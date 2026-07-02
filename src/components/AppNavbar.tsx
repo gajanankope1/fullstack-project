@@ -8,10 +8,11 @@ import { apiRequest } from "@/lib/api/client";
 
 interface AppNavbarProps {
   username?: string;
+  email?: string;
   walletBalance?: number;
 }
 
-export function AppNavbar({ username, walletBalance }: AppNavbarProps) {
+export function AppNavbar({ username, email, walletBalance }: AppNavbarProps) {
   const router = useRouter();
   const [isLoggingOut, setIsLoggingOut] = useState(false);
 
@@ -30,16 +31,18 @@ export function AppNavbar({ username, walletBalance }: AppNavbarProps) {
   return (
     <header className="border-b border-white/10 bg-slate-950/80 backdrop-blur">
       <div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-4">
-        <div>
-          <Link href="/dashboard" className="text-xl font-bold text-amber-400">
-            Crypto Derby
-          </Link>
-          {username ? (
-            <p className="text-sm text-slate-400">Welcome, {username}</p>
-          ) : null}
-        </div>
+        <Link href="/dashboard" className="text-xl font-bold text-amber-400">
+          Crypto Derby
+        </Link>
 
         <div className="flex items-center gap-4">
+          {username ? (
+            <div className="text-right text-sm">
+              <p className="font-medium text-white">{username}</p>
+              {email ? <p className="text-slate-400">{email}</p> : null}
+            </div>
+          ) : null}
+
           {typeof walletBalance === "number" ? (
             <div className="rounded-full border border-emerald-500/30 bg-emerald-500/10 px-4 py-2 text-sm text-emerald-300">
               Wallet: {walletBalance.toLocaleString()} coins

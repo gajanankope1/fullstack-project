@@ -54,6 +54,7 @@ interface DashboardData {
 
 interface Profile {
   username: string;
+  email: string;
   walletBalance: number;
 }
 
@@ -107,6 +108,7 @@ export default function DashboardPage() {
     <div>
       <AppNavbar
         username={profile.username}
+        email={profile.email}
         walletBalance={dashboard.walletBalance}
       />
 

@@ -1,12 +1,10 @@
-import { Types } from "mongoose";
-
 import { PREDEFINED_COINS } from "@/lib/constants/cryptoCoins";
 import { getMarketDataService } from "@/lib/market/marketDataService";
 import {
   calculatePercentageChange,
   comparePercentageChange,
 } from "@/lib/utils/precision";
-import { getDocumentId, WithObjectId } from "@/lib/utils/document";
+import { getDocumentId, getRefIdString, WithObjectId } from "@/lib/utils/document";
 import { IChallengeDocument } from "@/models/Challenge";
 import { IParticipant } from "@/models/Participant";
 import { ChallengeRepository } from "@/repositories/challengeRepository";
@@ -144,6 +142,11 @@ export class ChallengeLifecycleService {
       }
 
       const endingPrice = endingPrices[coinId];
+
+      if (!startingPrice || !endingPrice) {
+        continue;
+      }
+
       const percentageChange = calculatePercentageChange(
         startingPrice,
         endingPrice,
@@ -206,7 +209,7 @@ export class ChallengeLifecycleService {
 
       if (isWinner && payoutPerWinner > 0) {
         await this.walletService.credit(
-          (participant.userId as Types.ObjectId).toString(),
+          getRefIdString(participant.userId),
           payoutPerWinner,
           `Winnings from challenge ${challenge._id.toString()}`,
           challenge._id.toString(),

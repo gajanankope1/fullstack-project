@@ -11,6 +11,7 @@ import { apiRequest } from "@/lib/api/client";
 interface Profile {
   id: string;
   username: string;
+  email: string;
   walletBalance: number;
 }
 
@@ -166,6 +167,7 @@ export default function ChallengeDetailPage() {
     <div>
       <AppNavbar
         username={profile?.username}
+        email={profile?.email}
         walletBalance={profile?.walletBalance}
       />
 

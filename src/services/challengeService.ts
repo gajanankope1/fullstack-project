@@ -8,7 +8,7 @@ import {
 import { AppError } from "@/lib/errors/AppError";
 import { getMarketDataService } from "@/lib/market/marketDataService";
 import { calculatePercentageChange } from "@/lib/utils/precision";
-import { getDocumentId, WithObjectId } from "@/lib/utils/document";
+import { getDocumentId, getRefIdString, WithObjectId } from "@/lib/utils/document";
 import { CreateChallengeInput } from "@/lib/validation/challengeSchemas";
 import { IChallenge, IChallengeDocument } from "@/models/Challenge";
 import { IParticipant } from "@/models/Participant";
@@ -67,8 +67,7 @@ export class ChallengeService {
     );
     const currentUserParticipant = userId
       ? participants.find(
-          (participant) =>
-            (participant.userId as Types.ObjectId).toString() === userId,
+          (participant) => getRefIdString(participant.userId) === userId,
         )
       : undefined;
 
@@ -93,7 +92,7 @@ export class ChallengeService {
 
       return {
         id: getDocumentId(participant),
-        userId: (participant.userId as Types.ObjectId).toString(),
+        userId: getRefIdString(participant.userId),
         username:
           typeof participant.userId === "object" &&
           participant.userId !== null &&
@@ -325,7 +324,7 @@ export class ChallengeService {
             username: challenge.creatorId.username,
             email: challenge.creatorId.email,
           }
-        : { id: challenge.creatorId.toString() };
+        : { id: getRefIdString(challenge.creatorId) };
 
     return {
       id: challenge._id?.toString(),

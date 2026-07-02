@@ -8,6 +8,7 @@ import { apiRequest } from "@/lib/api/client";
 
 interface Profile {
   username: string;
+  email: string;
   walletBalance: number;
 }
 
@@ -57,6 +58,7 @@ export default function CreateChallengePage() {
     <div>
       <AppNavbar
         username={profile?.username}
+        email={profile?.email}
         walletBalance={profile?.walletBalance}
       />
 
