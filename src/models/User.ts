@@ -1,8 +1,10 @@
 import mongoose, { Document, Model, Schema } from "mongoose";
 
 export interface IUser {
+  username: string;
   email: string;
-  name: string;
+  passwordHash: string;
+  walletBalance: number;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -11,6 +13,14 @@ export interface IUserDocument extends IUser, Document {}
 
 const userSchema = new Schema<IUserDocument>(
   {
+    username: {
+      type: String,
+      required: true,
+      unique: true,
+      trim: true,
+      minlength: 3,
+      maxlength: 30,
+    },
     email: {
       type: String,
       required: true,
@@ -18,10 +28,15 @@ const userSchema = new Schema<IUserDocument>(
       lowercase: true,
       trim: true,
     },
-    name: {
+    passwordHash: {
       type: String,
       required: true,
-      trim: true,
+    },
+    walletBalance: {
+      type: Number,
+      required: true,
+      default: 10000,
+      min: 0,
     },
   },
   { timestamps: true },

@@ -1,0 +1,117 @@
+"use client";
+
+import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
+
+import { AppNavbar } from "@/components/AppNavbar";
+import { apiRequest } from "@/lib/api/client";
+
+interface Profile {
+  username: string;
+  walletBalance: number;
+}
+
+interface HistoryItem {
+  challengeId: string;
+  creator?: string;
+  selectedCoinSymbol?: string;
+  winningCoinSymbol?: string;
+  result: string;
+  durationMinutes: number;
+  profitLoss: number;
+  participationDate: string;
+  percentageChange?: string;
+  startingPrice?: string;
+  endingPrice?: string;
+}
+
+export default function HistoryPage() {
+  const router = useRouter();
+  const [profile, setProfile] = useState<Profile | null>(null);
+  const [history, setHistory] = useState<HistoryItem[]>([]);
+  const [error, setError] = useState("");
+
+  useEffect(() => {
+    Promise.all([
+      apiRequest<Profile>("/api/auth/me"),
+      apiRequest<HistoryItem[]>("/api/history"),
+    ])
+      .then(([profileResponse, historyResponse]) => {
+        setProfile(profileResponse.data);
+        setHistory(historyResponse.data);
+      })
+      .catch((loadError) => {
+        setError(
+          loadError instanceof Error ? loadError.message : "Failed to load history",
+        );
+        router.push("/login");
+      });
+  }, [router]);
+
+  return (
+    <div>
+      <AppNavbar
+        username={profile?.username}
+        walletBalance={profile?.walletBalance}
+      />
+
+      <main className="mx-auto max-w-6xl px-4 py-8">
+        <h1 className="text-3xl font-bold text-white">Challenge History</h1>
+        <p className="mt-2 text-slate-400">
+          Review previous challenges, results, and profit or loss.
+        </p>
+
+        {error ? <p className="mt-6 text-rose-400">{error}</p> : null}
+
+        <div className="mt-8 overflow-hidden rounded-2xl border border-white/10">
+          <table className="min-w-full text-left text-sm">
+            <thead className="bg-slate-900/90 text-slate-400">
+              <tr>
+                <th className="px-4 py-3">Date</th>
+                <th className="px-4 py-3">Creator</th>
+                <th className="px-4 py-3">Selected</th>
+                <th className="px-4 py-3">Winner</th>
+                <th className="px-4 py-3">Duration</th>
+                <th className="px-4 py-3">Movement</th>
+                <th className="px-4 py-3">Result</th>
+                <th className="px-4 py-3">Profit/Loss</th>
+              </tr>
+            </thead>
+            <tbody>
+              {history.map((item) => (
+                <tr key={item.challengeId} className="border-t border-white/5">
+                  <td className="px-4 py-3 text-slate-300">
+                    {new Date(item.participationDate).toLocaleString()}
+                  </td>
+                  <td className="px-4 py-3 text-slate-300">{item.creator ?? "—"}</td>
+                  <td className="px-4 py-3 text-slate-300">
+                    {item.selectedCoinSymbol ?? "—"}
+                  </td>
+                  <td className="px-4 py-3 text-slate-300">
+                    {item.winningCoinSymbol ?? "—"}
+                  </td>
+                  <td className="px-4 py-3 text-slate-300">
+                    {item.durationMinutes} min
+                  </td>
+                  <td className="px-4 py-3 text-slate-300">
+                    {item.percentageChange ?? "—"}%
+                  </td>
+                  <td className="px-4 py-3 text-slate-300">{item.result}</td>
+                  <td className="px-4 py-3 text-slate-300">
+                    {item.profitLoss.toLocaleString()}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+
+          {history.length === 0 ? (
+            <p className="px-4 py-8 text-center text-slate-400">
+              No completed challenges yet.
+            </p>
+          ) : null}
+        </div>
+      </main>
+    </div>
+  );
+}
