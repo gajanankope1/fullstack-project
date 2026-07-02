@@ -1,7 +1,7 @@
 import { Types } from "mongoose";
 
 import { PREDEFINED_COINS } from "@/lib/constants/cryptoCoins";
-import { MockMarketDataService } from "@/lib/market/mockMarketDataService";
+import { getMarketDataService } from "@/lib/market/marketDataService";
 import { getDocumentId, WithObjectId } from "@/lib/utils/document";
 import { IChallenge } from "@/models/Challenge";
 import { ChallengeRepository } from "@/repositories/challengeRepository";
@@ -15,7 +15,7 @@ export class DashboardService {
   private readonly participantRepository = new ParticipantRepository();
   private readonly userRepository = new UserRepository();
   private readonly lifecycleService = new ChallengeLifecycleService();
-  private readonly marketDataService = new MockMarketDataService();
+  private readonly marketDataService = getMarketDataService();
 
   async getDashboard(userId: string) {
     await this.lifecycleService.processPendingChallenges();
@@ -87,6 +87,7 @@ export class DashboardService {
         ...coin,
         currentPrice: marketOverview[coin.id],
       })),
+      marketProvider: this.marketDataService.getProviderStatus(),
     };
   }
 

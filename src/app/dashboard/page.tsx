@@ -45,6 +45,11 @@ interface DashboardData {
     name: string;
     currentPrice?: string;
   }>;
+  marketProvider: {
+    provider: "coingecko" | "mock";
+    configured: boolean;
+    usingFallback: boolean;
+  };
 }
 
 interface Profile {
@@ -156,7 +161,17 @@ export default function DashboardPage() {
         </section>
 
         <section className="mb-8">
-          <h2 className="mb-4 text-xl font-semibold text-white">Market Overview</h2>
+          <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
+            <h2 className="text-xl font-semibold text-white">Market Overview</h2>
+            <span className="rounded-full border border-white/10 px-3 py-1 text-xs text-slate-400">
+              Source:{" "}
+              {dashboard.marketProvider.usingFallback
+                ? "Fallback (mock)"
+                : dashboard.marketProvider.configured
+                  ? "CoinGecko"
+                  : "Mock (add COINGECKO_API_KEY)"}
+            </span>
+          </div>
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
             {dashboard.marketOverview.map((coin) => (
               <div

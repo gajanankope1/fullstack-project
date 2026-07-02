@@ -6,7 +6,7 @@ import {
   PREDEFINED_COINS,
 } from "@/lib/constants/cryptoCoins";
 import { AppError } from "@/lib/errors/AppError";
-import { MockMarketDataService } from "@/lib/market/mockMarketDataService";
+import { getMarketDataService } from "@/lib/market/marketDataService";
 import { calculatePercentageChange } from "@/lib/utils/precision";
 import { getDocumentId, WithObjectId } from "@/lib/utils/document";
 import { CreateChallengeInput } from "@/lib/validation/challengeSchemas";
@@ -23,7 +23,7 @@ export class ChallengeService {
   private readonly participantRepository = new ParticipantRepository();
   private readonly walletService = new WalletService();
   private readonly lifecycleService = new ChallengeLifecycleService();
-  private readonly marketDataService = new MockMarketDataService();
+  private readonly marketDataService = getMarketDataService();
 
   async createChallenge(userId: string, input: CreateChallengeInput) {
     const challenge = await this.challengeRepository.create({

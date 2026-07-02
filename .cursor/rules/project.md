@@ -13,6 +13,7 @@ Database:
 - Models: `src/models/`
 - Repositories: `src/repositories/`
 - Env: `MONGODB_URI` in `.env.local`
+- Env: `COINGECKO_API_KEY` in `.env.local` for live market data
 
 Architecture:
 

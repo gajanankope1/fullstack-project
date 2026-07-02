@@ -1,7 +1,7 @@
 import { Types } from "mongoose";
 
 import { PREDEFINED_COINS } from "@/lib/constants/cryptoCoins";
-import { MockMarketDataService } from "@/lib/market/mockMarketDataService";
+import { getMarketDataService } from "@/lib/market/marketDataService";
 import {
   calculatePercentageChange,
   comparePercentageChange,
@@ -18,7 +18,7 @@ export class ChallengeLifecycleService {
   private readonly challengeRepository = new ChallengeRepository();
   private readonly participantRepository = new ParticipantRepository();
   private readonly walletService = new WalletService();
-  private readonly marketDataService = new MockMarketDataService();
+  private readonly marketDataService = getMarketDataService();
 
   async processPendingChallenges(): Promise<void> {
     const challenges = await this.challengeRepository.findByStatuses([
