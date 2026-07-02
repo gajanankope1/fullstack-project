@@ -36,5 +36,8 @@ camelCase
 Constants:
 UPPER_SNAKE_CASE
 
-Database:
-snake_case
+MongoDB schema fields:
+camelCase
+
+Collection names:
+lowercase plural (e.g. users)

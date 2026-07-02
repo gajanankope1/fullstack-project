@@ -4,9 +4,15 @@ Stack:
 
 - Next.js App Router
 - TypeScript
-- MongoDB
-- Mongoose
+- MongoDB (via Mongoose)
 - Tailwind CSS
+
+Database:
+
+- Connection: `src/lib/db/mongoose.ts`
+- Models: `src/models/`
+- Repositories: `src/repositories/`
+- Env: `MONGODB_URI` in `.env.local`
 
 Architecture:
 
