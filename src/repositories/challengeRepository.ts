@@ -50,7 +50,7 @@ export class ChallengeRepository {
     data: Partial<IChallenge>,
   ): Promise<IChallengeDocument | null> {
     await connectDB();
-    return Challenge.findByIdAndUpdate(id, data, { new: true });
+    return Challenge.findByIdAndUpdate(id, data, { returnDocument: "after" });
   }
 
   async deleteById(id: string): Promise<void> {

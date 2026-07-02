@@ -30,6 +30,7 @@ Queries:
 - Use lean queries for read-only data when full Mongoose documents are not needed
 - Use `.select()` to limit returned fields
 - Prefer `findOne`, `findById`, `create`, `findOneAndUpdate` over raw collection access
+- Use `returnDocument: "after"` instead of deprecated `new: true` on update queries
 
 Indexes:
 

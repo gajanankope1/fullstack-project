@@ -54,7 +54,9 @@ export class ParticipantRepository {
     data: Partial<IParticipant>,
   ): Promise<IParticipantDocument | null> {
     await connectDB();
-    return Participant.findByIdAndUpdate(id, data, { new: true });
+    return Participant.findByIdAndUpdate(id, data, {
+      returnDocument: "after",
+    });
   }
 
   async countByChallengeId(challengeId: string): Promise<number> {

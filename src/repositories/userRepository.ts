@@ -40,7 +40,7 @@ export class UserRepository {
     return User.findByIdAndUpdate(
       userId,
       { walletBalance },
-      { new: true },
+      { returnDocument: "after" },
     );
   }
 }
