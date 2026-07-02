@@ -20,11 +20,11 @@ Responsibilities:
   - No HTTP logic
 
 - Repositories
-  - All Sequelize queries
+  - All Mongoose queries
   - No business logic
 
 - Models
-  - Sequelize model definitions only
+  - Mongoose schema and model definitions only
 
 Never skip layers.
 
