@@ -53,6 +53,17 @@ export class ChallengeRepository {
     return Challenge.findByIdAndUpdate(id, data, { returnDocument: "after" });
   }
 
+  async findCompletedByCreatorId(creatorId: string): Promise<IChallenge[]> {
+    await connectDB();
+    return Challenge.find({
+      creatorId,
+      status: ChallengeStatus.COMPLETED,
+    })
+      .sort({ endTime: -1 })
+      .populate("creatorId", "username email")
+      .lean<IChallenge[]>();
+  }
+
   async deleteById(id: string): Promise<void> {
     await connectDB();
     await Challenge.findByIdAndDelete(id);

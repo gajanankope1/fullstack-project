@@ -36,6 +36,8 @@ interface ChallengeDetail {
     percentageChange?: string;
     isWinner?: boolean;
     payout?: number;
+    entryAmount?: number;
+    netProfitLoss?: number;
   } | null;
   participants: Array<{
     id: string;
@@ -153,7 +155,6 @@ export default function ChallengeDetailPage() {
   const canJoin =
     challenge.status === "OPEN" &&
     !isParticipant &&
-    profile?.id !== challenge.creator.id &&
     new Date() < new Date(challenge.startTime);
   const canSelectCoin =
     challenge.status === "OPEN" &&
@@ -279,6 +280,10 @@ export default function ChallengeDetailPage() {
                 {challenge.status === "COMPLETED" ? (
                   <>
                     <div className="flex justify-between">
+                      <dt>Entry Amount</dt>
+                      <dd>{challenge.currentUserParticipant.entryAmount ?? "—"}</dd>
+                    </div>
+                    <div className="flex justify-between">
                       <dt>Result</dt>
                       <dd>
                         {challenge.currentUserParticipant.isWinner ? "WIN" : "LOSS"}
@@ -287,6 +292,10 @@ export default function ChallengeDetailPage() {
                     <div className="flex justify-between">
                       <dt>Payout</dt>
                       <dd>{challenge.currentUserParticipant.payout ?? 0}</dd>
+                    </div>
+                    <div className="flex justify-between">
+                      <dt>Net Profit/Loss</dt>
+                      <dd>{challenge.currentUserParticipant.netProfitLoss ?? 0}</dd>
                     </div>
                   </>
                 ) : null}

@@ -7,6 +7,7 @@ import { IChallenge } from "@/models/Challenge";
 import { ChallengeRepository } from "@/repositories/challengeRepository";
 import { ParticipantRepository } from "@/repositories/participantRepository";
 import { UserRepository } from "@/repositories/userRepository";
+import { ChallengeHistoryService } from "@/services/challengeHistoryService";
 import { ChallengeLifecycleService } from "@/services/challengeLifecycleService";
 import { ChallengeStatus } from "@/types/enums";
 
@@ -16,6 +17,7 @@ export class DashboardService {
   private readonly userRepository = new UserRepository();
   private readonly lifecycleService = new ChallengeLifecycleService();
   private readonly marketDataService = getMarketDataService();
+  private readonly challengeHistoryService = new ChallengeHistoryService();
 
   async getDashboard(userId: string) {
     await this.lifecycleService.processPendingChallenges();
@@ -25,6 +27,7 @@ export class DashboardService {
       await this.challengeRepository.findOpenChallenges();
     const participations =
       await this.participantRepository.findByUserId(userId);
+    const history = await this.challengeHistoryService.getUserHistory(userId);
     const marketOverview = await this.marketDataService.getCurrentPrices(
       PREDEFINED_COINS.map((coin) => coin.id),
     );
@@ -45,13 +48,6 @@ export class DashboardService {
         challenge?.status === ChallengeStatus.ACTIVE
       );
     });
-
-    const previousChallenges = participations
-      .filter((participation) => {
-        const challenge = participation.challengeId as { status?: ChallengeStatus };
-        return challenge?.status === ChallengeStatus.COMPLETED;
-      })
-      .slice(0, 5);
 
     const enrichedAvailable = await Promise.all(
       availableChallenges.map(async (challenge) => ({
@@ -80,9 +76,7 @@ export class DashboardService {
       activeChallenge: activeParticipation
         ? this.serializeActiveChallenge(activeParticipation)
         : null,
-      previousChallenges: previousChallenges.map((participation) =>
-        this.serializeHistoryItem(participation),
-      ),
+      previousChallenges: history.slice(0, 5),
       marketOverview: PREDEFINED_COINS.map((coin) => ({
         ...coin,
         currentPrice: marketOverview[coin.id],
@@ -100,6 +94,8 @@ export class DashboardService {
     percentageChange?: string;
     isWinner?: boolean;
     payout?: number;
+    entryAmount?: number;
+    netProfitLoss?: number;
   }) {
     const challenge = participation.challengeId as {
       _id: Types.ObjectId;
@@ -122,50 +118,7 @@ export class DashboardService {
       percentageChange: participation.percentageChange,
       isWinner: participation.isWinner,
       payout: participation.payout,
-    };
-  }
-
-  private serializeHistoryItem(participation: {
-    challengeId: unknown;
-    selectedCoinId?: string;
-    selectedCoinSymbol?: string;
-    percentageChange?: string;
-    isWinner?: boolean;
-    payout?: number;
-    joinedAt: Date;
-  }) {
-    const challenge = participation.challengeId as {
-      _id: Types.ObjectId;
-      creatorId: { username?: string } | Types.ObjectId;
-      startTime: Date;
-      endTime: Date;
-      winningCoinId?: string;
-      winningCoinSymbol?: string;
-    };
-
-    const durationMinutes = Math.round(
-      (new Date(challenge.endTime).getTime() -
-        new Date(challenge.startTime).getTime()) /
-        60000,
-    );
-
-    return {
-      challengeId: challenge._id.toString(),
-      creator:
-        typeof challenge.creatorId === "object" &&
-        challenge.creatorId !== null &&
-        "username" in challenge.creatorId
-          ? challenge.creatorId.username
-          : undefined,
-      selectedCoinId: participation.selectedCoinId,
-      selectedCoinSymbol: participation.selectedCoinSymbol,
-      winningCoinId: challenge.winningCoinId,
-      winningCoinSymbol: challenge.winningCoinSymbol,
-      result: participation.isWinner ? "WIN" : "LOSS",
-      durationMinutes,
-      profitLoss: participation.isWinner ? (participation.payout ?? 0) : 0,
-      participationDate: participation.joinedAt,
-      percentageChange: participation.percentageChange,
+      netProfitLoss: participation.netProfitLoss,
     };
   }
 }

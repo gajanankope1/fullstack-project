@@ -8,6 +8,7 @@ export class ParticipantRepository {
   async create(data: {
     challengeId: string;
     userId: string;
+    entryAmount: number;
   }): Promise<IParticipantDocument> {
     await connectDB();
     return Participant.create(data);

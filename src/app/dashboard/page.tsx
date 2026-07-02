@@ -7,6 +7,7 @@ import { AppNavbar } from "@/components/AppNavbar";
 import { ChallengeCard } from "@/components/ChallengeCard";
 import { CountdownTimer } from "@/components/CountdownTimer";
 import { apiRequest } from "@/lib/api/client";
+import { formatProfitLoss } from "@/lib/utils/profitLoss";
 
 interface DashboardData {
   walletBalance: number;
@@ -32,10 +33,13 @@ interface DashboardData {
   } | null;
   previousChallenges: Array<{
     challengeId: string;
+    role: "PARTICIPANT" | "CREATOR";
     creator?: string;
     selectedCoinSymbol?: string;
     winningCoinSymbol?: string;
     result: string;
+    entryAmount: number;
+    payout: number;
     profitLoss: number;
     participationDate: string;
   }>;
@@ -218,16 +222,18 @@ export default function DashboardPage() {
             <table className="min-w-full text-left text-sm">
               <thead className="bg-slate-900/90 text-slate-400">
                 <tr>
+                  <th className="px-4 py-3">Role</th>
                   <th className="px-4 py-3">Creator</th>
                   <th className="px-4 py-3">Selected</th>
                   <th className="px-4 py-3">Winner</th>
                   <th className="px-4 py-3">Result</th>
-                  <th className="px-4 py-3">Profit/Loss</th>
+                  <th className="px-4 py-3">Net P/L</th>
                 </tr>
               </thead>
               <tbody>
                 {dashboard.previousChallenges.map((item) => (
-                  <tr key={item.challengeId} className="border-t border-white/5">
+                  <tr key={`${item.challengeId}-${item.role}`} className="border-t border-white/5">
+                    <td className="px-4 py-3 text-slate-300">{item.role}</td>
                     <td className="px-4 py-3 text-slate-300">{item.creator ?? "—"}</td>
                     <td className="px-4 py-3 text-slate-300">
                       {item.selectedCoinSymbol ?? "—"}
@@ -236,8 +242,16 @@ export default function DashboardPage() {
                       {item.winningCoinSymbol ?? "—"}
                     </td>
                     <td className="px-4 py-3 text-slate-300">{item.result}</td>
-                    <td className="px-4 py-3 text-slate-300">
-                      {item.profitLoss.toLocaleString()}
+                    <td
+                      className={`px-4 py-3 ${
+                        item.profitLoss > 0
+                          ? "text-emerald-400"
+                          : item.profitLoss < 0
+                            ? "text-rose-400"
+                            : "text-slate-300"
+                      }`}
+                    >
+                      {formatProfitLoss(item.profitLoss)}
                     </td>
                   </tr>
                 ))}

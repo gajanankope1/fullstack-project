@@ -10,6 +10,8 @@ export interface IParticipant {
   percentageChange?: string;
   isWinner?: boolean;
   payout?: number;
+  entryAmount: number;
+  netProfitLoss?: number;
   joinedAt: Date;
   createdAt: Date;
   updatedAt: Date;
@@ -59,6 +61,15 @@ const participantSchema = new Schema<IParticipantDocument>(
       type: Number,
       default: 0,
       min: 0,
+    },
+    entryAmount: {
+      type: Number,
+      required: true,
+      min: 1,
+    },
+    netProfitLoss: {
+      type: Number,
+      default: 0,
     },
     joinedAt: {
       type: Date,

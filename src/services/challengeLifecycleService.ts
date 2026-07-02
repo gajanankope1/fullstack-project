@@ -5,6 +5,7 @@ import {
   comparePercentageChange,
 } from "@/lib/utils/precision";
 import { getDocumentId, getRefIdString, WithObjectId } from "@/lib/utils/document";
+import { calculateNetProfitLoss } from "@/lib/utils/profitLoss";
 import { IChallengeDocument } from "@/models/Challenge";
 import { IParticipant } from "@/models/Participant";
 import { ChallengeRepository } from "@/repositories/challengeRepository";
@@ -197,13 +198,23 @@ export class ChallengeLifecycleService {
             )
           : "0";
 
+      const payout = isWinner ? payoutPerWinner : 0;
+      const entryAmount =
+        participant.entryAmount ?? challenge.entryAmount;
+      const netProfitLoss = calculateNetProfitLoss(
+        entryAmount,
+        payout,
+        isWinner,
+      );
+
       await this.participantRepository.updateById(
         getDocumentId(participant),
         {
           endingPrice,
           percentageChange,
           isWinner,
-          payout: isWinner ? payoutPerWinner : 0,
+          payout,
+          netProfitLoss,
         },
       );
 

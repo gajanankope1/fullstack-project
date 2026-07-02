@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 
 import { AppNavbar } from "@/components/AppNavbar";
+import { formatProfitLoss } from "@/lib/utils/profitLoss";
 import { apiRequest } from "@/lib/api/client";
 
 interface Profile {
@@ -14,16 +15,20 @@ interface Profile {
 
 interface HistoryItem {
   challengeId: string;
+  role: "PARTICIPANT" | "CREATOR";
   creator?: string;
   selectedCoinSymbol?: string;
   winningCoinSymbol?: string;
-  result: string;
-  durationMinutes: number;
+  result: "WIN" | "LOSS" | "CREATED";
+  entryAmount: number;
+  payout: number;
   profitLoss: number;
+  durationMinutes: number;
   participationDate: string;
   percentageChange?: string;
   startingPrice?: string;
   endingPrice?: string;
+  participantCount?: number;
 }
 
 export default function HistoryPage() {
@@ -60,7 +65,7 @@ export default function HistoryPage() {
       <main className="mx-auto max-w-6xl px-4 py-8">
         <h1 className="text-3xl font-bold text-white">Challenge History</h1>
         <p className="mt-2 text-slate-400">
-          Review previous challenges, results, and profit or loss.
+          Review challenges you joined or created, with net profit and loss.
         </p>
 
         {error ? <p className="mt-6 text-rose-400">{error}</p> : null}
@@ -70,21 +75,23 @@ export default function HistoryPage() {
             <thead className="bg-slate-900/90 text-slate-400">
               <tr>
                 <th className="px-4 py-3">Date</th>
+                <th className="px-4 py-3">Role</th>
                 <th className="px-4 py-3">Creator</th>
                 <th className="px-4 py-3">Selected</th>
                 <th className="px-4 py-3">Winner</th>
-                <th className="px-4 py-3">Duration</th>
-                <th className="px-4 py-3">Movement</th>
+                <th className="px-4 py-3">Entry</th>
+                <th className="px-4 py-3">Payout</th>
                 <th className="px-4 py-3">Result</th>
-                <th className="px-4 py-3">Profit/Loss</th>
+                <th className="px-4 py-3">Net P/L</th>
               </tr>
             </thead>
             <tbody>
               {history.map((item) => (
-                <tr key={item.challengeId} className="border-t border-white/5">
+                <tr key={`${item.challengeId}-${item.role}`} className="border-t border-white/5">
                   <td className="px-4 py-3 text-slate-300">
                     {new Date(item.participationDate).toLocaleString()}
                   </td>
+                  <td className="px-4 py-3 text-slate-300">{item.role}</td>
                   <td className="px-4 py-3 text-slate-300">{item.creator ?? "—"}</td>
                   <td className="px-4 py-3 text-slate-300">
                     {item.selectedCoinSymbol ?? "—"}
@@ -93,14 +100,22 @@ export default function HistoryPage() {
                     {item.winningCoinSymbol ?? "—"}
                   </td>
                   <td className="px-4 py-3 text-slate-300">
-                    {item.durationMinutes} min
+                    {item.entryAmount > 0 ? item.entryAmount.toLocaleString() : "—"}
                   </td>
                   <td className="px-4 py-3 text-slate-300">
-                    {item.percentageChange ?? "—"}%
+                    {item.payout > 0 ? item.payout.toLocaleString() : "—"}
                   </td>
                   <td className="px-4 py-3 text-slate-300">{item.result}</td>
-                  <td className="px-4 py-3 text-slate-300">
-                    {item.profitLoss.toLocaleString()}
+                  <td
+                    className={`px-4 py-3 ${
+                      item.profitLoss > 0
+                        ? "text-emerald-400"
+                        : item.profitLoss < 0
+                          ? "text-rose-400"
+                          : "text-slate-300"
+                    }`}
+                  >
+                    {formatProfitLoss(item.profitLoss)}
                   </td>
                 </tr>
               ))}

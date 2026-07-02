@@ -9,6 +9,7 @@ import { AppError } from "@/lib/errors/AppError";
 import { getMarketDataService } from "@/lib/market/marketDataService";
 import { calculatePercentageChange } from "@/lib/utils/precision";
 import { getDocumentId, getRefIdString, WithObjectId } from "@/lib/utils/document";
+import { calculateNetProfitLoss } from "@/lib/utils/profitLoss";
 import { CreateChallengeInput } from "@/lib/validation/challengeSchemas";
 import { IChallenge, IChallengeDocument } from "@/models/Challenge";
 import { IParticipant } from "@/models/Participant";
@@ -90,6 +91,19 @@ export class ChallengeService {
             )
           : participant.percentageChange;
 
+      const entryAmount =
+        participant.entryAmount ?? challenge.entryAmount;
+      const payout = participant.payout ?? 0;
+      const netProfitLoss =
+        participant.netProfitLoss ??
+        (challenge.status === ChallengeStatus.COMPLETED
+          ? calculateNetProfitLoss(
+              entryAmount,
+              payout,
+              Boolean(participant.isWinner),
+            )
+          : undefined);
+
       return {
         id: getDocumentId(participant),
         userId: getRefIdString(participant.userId),
@@ -106,7 +120,9 @@ export class ChallengeService {
         currentPrice,
         percentageChange,
         isWinner: participant.isWinner,
-        payout: participant.payout,
+        entryAmount,
+        payout,
+        netProfitLoss,
         joinedAt: participant.joinedAt,
       };
     },
@@ -142,10 +158,6 @@ export class ChallengeService {
       throw new AppError("Participation freeze time has passed", 400);
     }
 
-    if (challenge.creatorId.toString() === userId) {
-      throw new AppError("Challenge creator cannot join their own challenge", 400);
-    }
-
     const activeParticipation = await this.getActiveParticipation(userId);
 
     if (activeParticipation) {
@@ -175,6 +187,7 @@ export class ChallengeService {
     const participant = await this.participantRepository.create({
       challengeId,
       userId,
+      entryAmount: challenge.entryAmount,
     });
 
     return {
